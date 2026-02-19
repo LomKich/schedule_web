@@ -227,11 +227,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
       <div style="height:14px"></div>
     </div>
     
-    <!-- Кнопка выбора группы (основное действие) -->
-    <button class="btn btn-accent" onclick="startGroupSelection()" style="margin-top:20px">
-      <span>📋 Выбрать группу</span>
-    </button>
-    
     <!-- Статус загрузки -->
     <div style="height:16px"></div>
     <div class="status" id="home-status"></div>
@@ -490,7 +485,7 @@ function updateLastGroupBtn(){
 }
 async function jumpToLastGroup(){
   if(!S.selectedFile){
-    toast('Сначала загрузи файл расписания');
+    toast('Сначала загрузите файл расписания');
     await loadFiles(true);
   }
   if(S.selectedFile) await loadSchedule(S.lastGroup);
@@ -506,6 +501,9 @@ function getProxiesList(){
   list.push(''); // прямое (обычно не работает, но оставляем)
   list.push('https://corsproxy.io/?url=');
   list.push('https://api.allorigins.win/raw?url=');
+  // можно добавить ещё варианты
+  list.push('https://cors-anywhere.herokuapp.com/');
+  list.push('https://thingproxy.freeboard.io/fetch/');
   return list;
 }
 
@@ -590,17 +588,6 @@ async function testAndLoadFiles(){
   await loadFiles(true);
   if(S.files.length > 0){
     toast('Файлы загружены! Можно выбрать группу');
-  }
-}
-
-async function startGroupSelection(){
-  setStatus('home-status', '⏳ Загружаю список файлов...');
-  await loadFiles(true);
-  if(S.files.length > 0){
-    goToGroups();
-  } else {
-    toast('Нет файлов .doc в папке');
-    setStatus('home-status', '❌ Файлы не найдены');
   }
 }
 
