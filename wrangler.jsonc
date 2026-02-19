@@ -1,6 +1,7 @@
 {
   "name": "scheduleweb",
   "compatibility_date": "2026-02-19",
+  "main": "worker.js",
   "assets": {
     "directory": "./"
   }
