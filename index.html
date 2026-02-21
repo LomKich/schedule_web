@@ -368,7 +368,16 @@ function pushScreen(id,navId){showScreen(id);if(navId)updateNavActive(navId);his
 function goHome(){showScreen('s-home','back');updateNavActive('nav-home');updateLastGroupBtn();const fs=document.getElementById('file-section');const err=document.getElementById('home-error-hint');const noUrl=document.getElementById('no-url-hint');if(fs.classList.contains('hidden')&&err.classList.contains('hidden')&&noUrl.classList.contains('hidden'))loadFiles();}
 function navTo(id,navId){pushScreen(id,navId);}
 function histBack(){history.back();}
-function handleBack(){const info=SCREEN_PARENTS[cur];if(!info)return;showScreen(info.parent,'back');if(info.nav)updateNavActive(info.nav);if(info.parent==='s-home'){updateNavActive('nav-home');updateLastGroupBtn();}}
+function handleBack(){
+  const info=SCREEN_PARENTS[cur];
+  if(!info)return; // уже на главном, браузер сам обработает
+  if(info.parent==='s-home'){
+    goHome(); // полный goHome с перезапуском загрузки если нужно
+  } else {
+    showScreen(info.parent,'back');
+    if(info.nav)updateNavActive(info.nav);
+  }
+}
 window.addEventListener('popstate',function(){handleBack();});
 function updateNavActive(aid){['nav-home','nav-bells','nav-settings'].forEach(id=>document.getElementById(id)?.classList.toggle('active',id===aid));}
 
