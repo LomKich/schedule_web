@@ -18,10 +18,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geologica',sans-serif;overflow:hidden}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bot);overflow:hidden;opacity:0;pointer-events:none;transform:translateY(18px) translateZ(0);transition:opacity .2s cubic-bezier(.4,0,.2,1),transform .2s cubic-bezier(.4,0,.2,1);will-change:opacity,transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bot);overflow:hidden;opacity:0;pointer-events:none;transform:translateY(20px);transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1);will-change:opacity,transform}
 .screen.active{opacity:1;pointer-events:all;transform:none}
-.screen.exit-left{opacity:0;transform:translateX(-28px) translateZ(0);transition:opacity .15s ease-in,transform .15s ease-in}
-.screen.exit-right{opacity:0;transform:translateX(28px) translateZ(0);transition:opacity .15s ease-in,transform .15s ease-in}
+.screen.exit-left{opacity:0;transform:translateX(-32px);transition:opacity .18s,transform .18s}
+.screen.exit-right{opacity:0;transform:translateX(32px);transition:opacity .18s,transform .18s}
 .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px}
 .body::-webkit-scrollbar{display:none}
 .hdr{padding:14px 18px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;background:var(--surface)}
@@ -214,8 +214,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
            autocomplete="off" autocorrect="off" autocapitalize="off">
     <div style="height:8px"></div>
     <button class="btn btn-accent2" onclick="saveUrlAndLoad()">⬇ Обновить файлы</button>
-    <div style="height:4px"></div>
-    <div style="font-size:11px;color:var(--muted);text-align:right">Версия 1.4.0 — Веб</div>
     <div style="height:6px"></div>
     <div class="status" id="proxy-status" style="text-align:left;font-size:11px"></div>
     <div class="sep"></div>
@@ -227,6 +225,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
       </div>
       <span class="item-arrow">›</span>
     </div>
+    <div style="text-align:right;font-size:11px;color:var(--muted);padding:8px 4px 0">v1.4.0 — Веб</div>
   </div>
 </div>
 
@@ -358,34 +357,13 @@ function saveLocal(){stor.set('sched',JSON.stringify({group:S.lastGroup,theme:S.
 
 // НАВИГАЦИЯ + ИСТОРИЯ БРАУЗЕРА
 let cur='s-home';
-const SCREEN_PARENTS={
-  's-groups'  :{parent:'s-home',    nav:'nav-home'},
-  's-schedule':{parent:'s-home',    nav:'nav-home'}, // назад → всегда на главную
-  's-bells'   :{parent:'s-home',    nav:'nav-bells'},
-  's-settings':{parent:'s-home',    nav:'nav-home'},
-  's-themes'  :{parent:'s-settings',nav:null},
-};
-// Плавные переходы через requestIdleCallback:
-// если браузер занят → ждём свободный момент (≤300мс), потом анимируем.
-// Анимация ВСЕГДА воспроизводится, просто иногда чуть позже.
-function _runTransition(prev,next,dir){
-  prev.classList.add(dir==='back'?'exit-right':'exit-left');
-  prev.classList.remove('active');
-  setTimeout(()=>prev.classList.remove('exit-left','exit-right'),320);
-  next.style.transition='none';
-  void next.getBoundingClientRect(); // force reflow — фиксируем начальный стейт
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    next.style.transition=''; next.classList.add('active');
-  }));
-}
+const SCREEN_PARENTS={'s-groups':{parent:'s-home',nav:'nav-home'},'s-schedule':{parent:'s-home',nav:'nav-home'},'s-bells':{parent:'s-home',nav:'nav-bells'},'s-settings':{parent:'s-home',nav:'nav-home'},'s-themes':{parent:'s-settings',nav:null}};
 function showScreen(id,dir='forward'){
   if(id===cur)return;
   const prev=document.getElementById(cur),next=document.getElementById(id);
-  cur=id;
-  const go=()=>_runTransition(prev,next,dir);
-  typeof requestIdleCallback!=='undefined'
-    ? requestIdleCallback(go,{timeout:300})
-    : setTimeout(go,0);
+  prev.classList.add(dir==='back'?'exit-right':'exit-left');prev.classList.remove('active');
+  setTimeout(()=>prev.classList.remove('exit-left','exit-right'),250);
+  next.classList.add('active');cur=id;
 }
 function pushScreen(id,navId){showScreen(id);if(navId)updateNavActive(navId);history.pushState({screen:id},'');}
 function goHome(){showScreen('s-home','back');updateNavActive('nav-home');updateLastGroupBtn();const fs=document.getElementById('file-section');const err=document.getElementById('home-error-hint');const noUrl=document.getElementById('no-url-hint');if(fs.classList.contains('hidden')&&err.classList.contains('hidden')&&noUrl.classList.contains('hidden'))loadFiles();}
@@ -393,9 +371,13 @@ function navTo(id,navId){pushScreen(id,navId);}
 function histBack(){history.back();}
 function handleBack(){
   const info=SCREEN_PARENTS[cur];
-  if(!info)return;
-  if(info.parent==='s-home'){goHome();}
-  else{showScreen(info.parent,'back');if(info.nav)updateNavActive(info.nav);}
+  if(!info)return; // уже на главном, браузер сам обработает
+  if(info.parent==='s-home'){
+    goHome(); // полный goHome с перезапуском загрузки если нужно
+  } else {
+    showScreen(info.parent,'back');
+    if(info.nav)updateNavActive(info.nav);
+  }
 }
 window.addEventListener('popstate',function(){handleBack();});
 function updateNavActive(aid){['nav-home','nav-bells','nav-settings'].forEach(id=>document.getElementById(id)?.classList.toggle('active',id===aid));}
