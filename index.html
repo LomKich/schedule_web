@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#000c18" id="meta-theme">
+<meta name="theme-color" content="#0d0d0d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Расписание">
-<link rel="manifest" href="manifest.json">
 <title>Расписание колледжа</title>
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -21,8 +20,8 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geologica',sans-serif;overflow:hidden}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bot);overflow:hidden;opacity:0;pointer-events:none;transform:translateY(18px) translateZ(0);transition:opacity .2s cubic-bezier(.4,0,.2,1),transform .2s cubic-bezier(.4,0,.2,1);will-change:opacity,transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .screen.active{opacity:1;pointer-events:all;transform:none}
-.screen.exit-left{opacity:0;transform:translateX(-28px) translateZ(0);transition:opacity .16s ease-in,transform .16s ease-in}
-.screen.exit-right{opacity:0;transform:translateX(28px) translateZ(0);transition:opacity .16s ease-in,transform .16s ease-in}
+.screen.exit-left{opacity:0;transform:translateX(-28px) translateZ(0);transition:opacity .15s ease-in,transform .15s ease-in}
+.screen.exit-right{opacity:0;transform:translateX(28px) translateZ(0);transition:opacity .15s ease-in,transform .15s ease-in}
 .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px}
 .body::-webkit-scrollbar{display:none}
 .hdr{padding:14px 18px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;background:var(--surface)}
@@ -50,8 +49,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
 [data-theme="forest"] .btn-accent,[data-theme="forest"] .btn-accent2,
 [data-theme="rose"] .btn-accent,[data-theme="rose"] .btn-accent2,
 [data-theme="purple"] .btn-accent,[data-theme="purple"] .btn-accent2,
-[data-theme="sunset"] .btn-accent,[data-theme="sunset"] .btn-accent2,
-[data-theme="glass"] .btn-accent,[data-theme="glass"] .btn-accent2{color:#fff}
+[data-theme="sunset"] .btn-accent,[data-theme="sunset"] .btn-accent2{color:#000}
 [data-theme="gold"] .btn-accent,[data-theme="gold"] .btn-accent2{color:#fff}
 .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.2);transform:scale(0);animation:ripple-anim .55s ease-out forwards;pointer-events:none}
 @keyframes ripple-anim{to{transform:scale(4);opacity:0}}
@@ -106,6 +104,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
 .nav-item .nav-icon{font-size:20px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
 .nav-item.active{color:var(--accent)}
 .nav-item.active .nav-icon{transform:scale(1.15)}
+/* Темы: список */
 .theme-list{display:flex;flex-direction:column;gap:7px;margin-top:4px}
 .theme-card{background:var(--surface2);border-radius:var(--rb);padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;border:1.5px solid var(--surface3);position:relative;overflow:hidden;transition:border-color .15s,background .15s}
 .theme-card:active{background:var(--surface3)}
@@ -116,245 +115,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
 .theme-name{font-size:13px;font-weight:700;flex:1}
 .theme-check{font-size:16px;flex-shrink:0;opacity:0;transition:opacity .15s;color:var(--accent)}
 .theme-card.selected .theme-check{opacity:1}
-.proxy-list{display:flex;flex-direction:column;gap:7px}
-.proxy-card{background:var(--surface2);border-radius:var(--rb);padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--surface3);position:relative;overflow:hidden;transition:border-color .15s,background .15s}
-.proxy-card:active{background:var(--surface3)}
-.proxy-card.selected{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 70%,transparent)}
-.proxy-card.selected .proxy-name{color:var(--accent)}
-.proxy-ico{font-size:22px;flex-shrink:0;margin-top:1px}
-.proxy-name{font-size:13px;font-weight:700}
-.proxy-addr{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
-.proxy-desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
-.proxy-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;flex-shrink:0}
-.tag-free{background:color-mix(in srgb,var(--success) 20%,transparent);color:var(--success)}
-.tag-limit{background:color-mix(in srgb,#f0a500 20%,transparent);color:#f0a500}
-.tag-own{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
-.proxy-check{font-size:18px;flex-shrink:0;opacity:0;margin-top:2px;margin-left:auto;color:var(--accent);transition:opacity .15s}
-.proxy-card.selected .proxy-check{opacity:1}
-.version-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface2);border-radius:var(--rb);border:1.5px solid var(--surface3)}
-.version-lbl{font-size:11px;color:var(--muted);margin-bottom:2px}
-.version-val{font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:600}
-@keyframes pulse-update{0%,100%{box-shadow:0 0 0 0 rgba(74,158,92,.6)}70%{box-shadow:0 0 0 6px rgba(74,158,92,0)}}
 .hidden{display:none!important}
 .mt8{margin-top:8px}.mt16{margin-top:16px}
-
-/* ══════════════════════════════════
-        LIQUID GLASS DARK THEME
-   ══════════════════════════════════ */
-
-/* Анимированный фон */
-#glass-bg{
-  display:none;
-  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
-  background:radial-gradient(ellipse at 25% 15%,#001428 0%,#000c18 55%,#000408 100%);
-}
-[data-theme="glass"] #glass-bg{display:block}
-[data-theme="glass"] html,[data-theme="glass"] body{background:#000c18 !important}
-[data-theme="glass"] .screen{z-index:1}
-[data-theme="glass"] .body{background:transparent !important}
-
-.glass-blob{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform}
-.blob-1{width:560px;height:560px;top:-160px;left:-180px;
-  background:radial-gradient(circle,#073060 0%,#041a40 70%);
-  opacity:.75;animation:blob1 16s ease-in-out infinite}
-.blob-2{width:400px;height:400px;top:30%;right:-120px;
-  background:radial-gradient(circle,#0555a0 0%,#032870 70%);
-  opacity:.55;animation:blob2 12s ease-in-out infinite}
-.blob-3{width:300px;height:300px;bottom:12%;left:5%;
-  background:radial-gradient(circle,#062060 0%,#031040 70%);
-  opacity:.6;animation:blob3 10s ease-in-out infinite}
-.blob-4{width:240px;height:240px;top:58%;left:42%;
-  background:radial-gradient(circle,#0e2870 0%,#081848 70%);
-  opacity:.4;animation:blob4 18s ease-in-out infinite}
-.blob-5{width:180px;height:180px;top:15%;right:15%;
-  background:radial-gradient(circle,#0a4090 0%,#062060 70%);
-  opacity:.35;animation:blob5 8s ease-in-out infinite}
-
-@keyframes blob1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(45px,28px) scale(1.07)}66%{transform:translate(-22px,44px) scale(.96)}}
-@keyframes blob2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-38px,-22px) scale(1.09)}66%{transform:translate(22px,38px) scale(.93)}}
-@keyframes blob3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28px,-32px) scale(1.12)}}
-@keyframes blob4{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(-22px,22px) scale(.91)}80%{transform:translate(32px,-18px) scale(1.06)}}
-@keyframes blob5{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-15px,20px) scale(1.1)}}
-
-/* ── Глassморфизм для панелей ── */
-[data-theme="glass"] .hdr,
-[data-theme="glass"] .sched-header,
-[data-theme="glass"] .bottom-nav{
-  background:rgba(6,18,44,.58) !important;
-  backdrop-filter:blur(40px) saturate(180%) brightness(1.1);
-  -webkit-backdrop-filter:blur(40px) saturate(180%) brightness(1.1);
-  border-color:rgba(255,255,255,.10) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.07),0 -1px 0 rgba(0,0,0,.3);
-}
-
-/* Карточки — матовое стекло */
-[data-theme="glass"] .pair-card,
-[data-theme="glass"] .list-item,
-[data-theme="glass"] .bell-card,
-[data-theme="glass"] .theme-card,
-[data-theme="glass"] .proxy-card,
-[data-theme="glass"] .last-group-btn,
-[data-theme="glass"] .version-row{
-  background:rgba(255,255,255,.072) !important;
-  backdrop-filter:blur(28px) saturate(160%);
-  -webkit-backdrop-filter:blur(28px) saturate(160%);
-  border-color:rgba(255,255,255,.115) !important;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.10) inset,
-    0 -1px 0 rgba(0,0,0,.25) inset,
-    0 4px 20px rgba(0,0,0,.3);
-}
-
-/* Верхний блик — ключевой эффект стекла */
-[data-theme="glass"] .pair-card::before,
-[data-theme="glass"] .list-item::before,
-[data-theme="glass"] .bell-card::before,
-[data-theme="glass"] .theme-card::before,
-[data-theme="glass"] .proxy-card::before{
-  content:'';
-  position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(155deg,
-    rgba(255,255,255,.12) 0%,
-    rgba(255,255,255,.04) 35%,
-    rgba(255,255,255,.01) 55%,
-    transparent 70%);
-  pointer-events:none;z-index:0;
-}
-
-[data-theme="glass"] .pair-card:active,
-[data-theme="glass"] .list-item:active,
-[data-theme="glass"] .theme-card:active,
-[data-theme="glass"] .proxy-card:active{
-  background:rgba(255,255,255,.13) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 4px 16px rgba(0,0,0,.2) !important;
-}
-
-/* Input */
-[data-theme="glass"] .inp{
-  background:rgba(255,255,255,.082) !important;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-color:rgba(255,255,255,.14) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.08) inset;
-  color:#fff !important;
-}
-[data-theme="glass"] .inp::placeholder{color:rgba(255,255,255,.35) !important}
-[data-theme="glass"] .inp:focus{
-  border-color:rgba(48,168,255,.7) !important;
-  box-shadow:0 0 0 3px rgba(48,168,255,.18),0 1px 0 rgba(255,255,255,.10) inset !important;
-}
-
-/* Кнопки */
-[data-theme="glass"] .btn-surface{
-  background:rgba(255,255,255,.10) !important;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1.5px solid rgba(255,255,255,.14) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.10) inset !important;
-}
-[data-theme="glass"] .btn-surface3{
-  background:rgba(48,168,255,.18) !important;
-  border:1.5px solid rgba(48,168,255,.32) !important;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-}
-[data-theme="glass"] .btn-accent{
-  box-shadow:0 4px 24px rgba(48,168,255,.42),0 1px 0 rgba(255,255,255,.28) inset !important;
-}
-[data-theme="glass"] .btn-accent2{
-  box-shadow:0 4px 24px rgba(10,132,255,.42),0 1px 0 rgba(255,255,255,.22) inset !important;
-}
-
-/* Вспомогательные */
-[data-theme="glass"] .progress{background:rgba(255,255,255,.08)}
-[data-theme="glass"] .sep{background:rgba(255,255,255,.08)}
-[data-theme="glass"] .toast{
-  background:rgba(6,18,44,.88) !important;
-  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
-  border-color:rgba(255,255,255,.14) !important;
-  box-shadow:0 8px 32px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.10) inset !important;
-}
-
-/* Hero */
-[data-theme="glass"] .hero-title{
-  color:#fff !important;
-  text-shadow:
-    0 0 18px rgba(48,168,255,.95),
-    0 0 45px rgba(48,168,255,.55),
-    0 0 90px rgba(48,168,255,.28),
-    0 2px 6px rgba(0,0,0,.6) !important;
-}
-[data-theme="glass"] .home-hero::before{
-  background:radial-gradient(circle,rgba(48,168,255,.22) 0%,transparent 70%) !important;
-}
-
-/* Выделение */
-[data-theme="glass"] .list-item.selected{
-  background:rgba(48,168,255,.18) !important;
-  border-color:rgba(48,168,255,.5) !important;
-  box-shadow:0 0 0 1px rgba(48,168,255,.28),
-             0 0 24px rgba(48,168,255,.18),
-             0 1px 0 rgba(255,255,255,.16) inset !important;
-}
-[data-theme="glass"] .list-item.selected .item-name{
-  color:#30a8ff !important;
-  text-shadow:0 0 10px rgba(48,168,255,.75) !important;
-}
-[data-theme="glass"] .pair-card.is-now{
-  background:rgba(48,168,255,.14) !important;
-  border-color:rgba(48,168,255,.38) !important;
-  box-shadow:0 0 20px rgba(48,168,255,.16),0 1px 0 rgba(255,255,255,.12) inset !important;
-}
-[data-theme="glass"] .pair-card.is-next{
-  background:rgba(50,215,75,.10) !important;
-  border-left-color:rgba(50,215,75,.75) !important;
-}
-[data-theme="glass"] .pair-card.has-subject{
-  border-left-color:rgba(48,168,255,.65) !important;
-}
-[data-theme="glass"] .theme-card.selected,
-[data-theme="glass"] .proxy-card.selected{
-  background:rgba(48,168,255,.17) !important;
-  border-color:rgba(48,168,255,.45) !important;
-  box-shadow:0 0 18px rgba(48,168,255,.16),0 1px 0 rgba(255,255,255,.14) inset !important;
-}
-[data-theme="glass"] .nav-item.active{color:#30a8ff !important}
-[data-theme="glass"] .bell-slot-tag,
-[data-theme="glass"] .pair-time-tag{
-  background:rgba(255,255,255,.10) !important;
-  color:rgba(255,255,255,.52) !important;
-}
-/* ══ END GLASS ══ */
 </style>
 </head>
 <body>
-
-<!-- Animated glass background -->
-<div id="glass-bg">
-  <div class="glass-blob blob-1"></div>
-  <div class="glass-blob blob-2"></div>
-  <div class="glass-blob blob-3"></div>
-  <div class="glass-blob blob-4"></div>
-  <div class="glass-blob blob-5"></div>
-</div>
-
-<!-- Баннер обновления -->
-<div id="update-banner" class="hidden" style="
-  position:fixed;top:0;left:0;right:0;z-index:9999;
-  background:rgba(30,90,50,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  padding:calc(14px + var(--safe-top)) 18px 14px;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  border-bottom:1.5px solid rgba(50,215,75,.35);
-  box-shadow:0 4px 24px rgba(0,0,0,.4);
-">
-  <div>
-    <div style="font-size:13px;font-weight:700;color:#fff">🎉 Доступно обновление!</div>
-    <div id="update-ver-text" style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px"></div>
-  </div>
-  <button onclick="doUpdate()" style="
-    background:#fff;color:#1a5a30;border:none;border-radius:20px;
-    font-family:inherit;font-size:12px;font-weight:800;
-    padding:7px 16px;cursor:pointer;flex-shrink:0;
-    box-shadow:0 2px 8px rgba(0,0,0,.3);
-  ">Обновить</button>
-</div>
 
 <!-- ГЛАВНАЯ -->
 <div class="screen active" id="s-home">
@@ -384,8 +149,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
     <div id="home-error-hint" class="hidden" style="text-align:center;padding:32px 20px">
       <div style="font-size:32px;margin-bottom:10px">⚠️</div>
       <div style="color:var(--text);font-size:15px;font-weight:700;margin-bottom:6px">Не удалось загрузить файлы</div>
-      <div style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px" class="error-msg"></div>
-      <button class="btn btn-surface3" onclick="navTo('s-settings','nav-settings');setTimeout(()=>pushScreen('s-proxy'),50)">🌐 Сменить прокси</button>
+      <div style="color:var(--muted);font-size:13px;line-height:1.6" class="error-msg"></div>
     </div>
   </div>
   <div class="bottom-nav">
@@ -450,39 +214,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
            autocomplete="off" autocorrect="off" autocapitalize="off">
     <div style="height:8px"></div>
     <button class="btn btn-accent2" onclick="saveUrlAndLoad()">⬇ Обновить файлы</button>
+    <div style="height:4px"></div>
+    <div style="font-size:11px;color:var(--muted);text-align:right">Версия 1.4.0 — Веб</div>
     <div style="height:6px"></div>
     <div class="status" id="proxy-status" style="text-align:left;font-size:11px"></div>
-    
     <div class="sep"></div>
     <div class="section-label">Тема оформления</div>
     <div id="theme-current-row" class="list-item" onclick="pushScreen('s-themes')">
       <div>
-        <div class="item-name" id="theme-current-name">💧 Liquid Glass</div>
+        <div class="item-name" id="theme-current-name">🟠 Колледж</div>
         <div class="item-sub">Нажми для выбора темы</div>
       </div>
       <span class="item-arrow">›</span>
     </div>
-    <div class="sep"></div>
-    <div class="section-label">Приложение</div>
-    <div class="version-row">
-      <div>
-        <div class="version-lbl">Версия</div>
-        <div class="version-val" id="version-display">—</div>
-      </div>
-      <button id="update-btn" onclick="checkForUpdate()" style="
-        background:var(--surface3);color:var(--accent);
-        border:1.5px solid rgba(255,255,255,.08);border-radius:20px;
-        font-family:inherit;font-size:12px;font-weight:700;
-        padding:7px 14px;cursor:pointer;
-      ">🔄 Проверить</button>
-    </div>
-    <div style="height:7px"></div>
-    <button class="btn btn-surface" onclick="clearCacheAndReload()" style="font-size:13px;padding:12px">
-      🧹 Очистить кэш и перезагрузить
-    </button>
   </div>
 </div>
-
 
 <!-- ВЫБОР ТЕМЫ -->
 <div class="screen" id="s-themes">
@@ -501,58 +247,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
 <div class="toast" id="toast"></div>
 
 <script>
-const APP_VERSION = '2.1.0';
-
-// ══ SERVICE WORKER ══
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(reg=>{
-    reg.addEventListener('updatefound',()=>{
-      const nw=reg.installing;
-      nw.addEventListener('statechange',()=>{
-        if(nw.state==='installed'&&navigator.serviceWorker.controller)
-          showUpdateBanner('Новая версия готова — нажми Обновить');
-      });
-    });
-  }).catch(()=>{});
-  navigator.serviceWorker.addEventListener('message',e=>{
-    if(e.data?.type==='SW_UPDATED')showUpdateBanner('Обновлено до '+e.data.version);
-  });
-}
-function showUpdateBanner(text){
-  document.getElementById('update-ver-text').textContent=text;
-  document.getElementById('update-banner').classList.remove('hidden');
-}
-function doUpdate(){
-  document.getElementById('update-banner').classList.add('hidden');
-  clearCacheAndReload();
-}
-async function checkForUpdate(){
-  const btn=document.getElementById('update-btn');
-  btn.textContent='⏳...';btn.disabled=true;
-  try{
-    const regs=await navigator.serviceWorker?.getRegistrations?.();
-    if(regs?.length)await Promise.all(regs.map(r=>r.update()));
-    const r=await fetch(window.location.href,{cache:'no-cache',signal:AbortSignal.timeout(8000)});
-    const html=await r.text();
-    const m=html.match(/APP_VERSION\s*=\s*'([\d.]+)'/);
-    if(m&&m[1]!==APP_VERSION){
-      showUpdateBanner('Доступна версия '+m[1]+' (текущая '+APP_VERSION+')');
-    }else{toast('✅ Версия '+APP_VERSION+' — актуальная');}
-  }catch(e){toast('❌ '+e.message);}
-  btn.textContent='🔄 Проверить';btn.disabled=false;
-}
-async function clearCacheAndReload(){
-  toast('Очищаю кэш...');
-  try{
-    if('caches' in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)));}
-    Object.keys(FILE_CACHE).forEach(k=>delete FILE_CACHE[k]);
-    setTimeout(()=>window.location.reload(true),500);
-  }catch(e){window.location.reload(true);}
-}
-
 // RIPPLE
 document.addEventListener('click',function(e){
-  const el=e.target.closest('.btn,.hdr-back,.last-group-btn,.nav-item,.theme-card,.list-item,.proxy-card');
+  const el=e.target.closest('.btn,.hdr-back,.last-group-btn,.nav-item,.theme-card,.list-item');
   if(!el)return;
   const r=document.createElement('span');r.className='ripple';
   const rect=el.getBoundingClientRect(),size=Math.max(rect.width,rect.height)*2;
@@ -560,49 +257,26 @@ document.addEventListener('click',function(e){
   el.appendChild(r);setTimeout(()=>r.remove(),560);
 });
 
-// ПРОКСИ
-// Прокси — оригинальный метод: /proxy/ на том же Cloudflare Worker
-const PROXY='/proxy/';
-
-async function yadGet(path,params){
-  const qs=new URLSearchParams(params).toString();
-  const raw=`https://cloud-api.yandex.net${path}?${qs}`;
-  const r=await fetch(PROXY+encodeURIComponent(raw),{signal:AbortSignal.timeout(15000)});
-  if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  const el=document.getElementById('proxy-status');
-  if(el)el.textContent='✅ Подключено';
-  return r.json();
-}
-
-async function yadDownload(rawUrl){
-  const r=await fetch(PROXY+encodeURIComponent(rawUrl),{signal:AbortSignal.timeout(60000)});
-  if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  return r.arrayBuffer();
-}
-
-
 // ТЕМЫ
 const THEMES={
-  'glass':{name:'Liquid Glass',ico:'💧',vars:{'--bg':'#000c18','--surface':'rgba(6,18,44,0.58)','--surface2':'rgba(255,255,255,0.072)','--surface3':'rgba(255,255,255,0.13)','--accent':'#30a8ff','--accent2':'#0a84ff','--text':'#ffffff','--muted':'rgba(255,255,255,0.45)','--success':'#32d74b','--danger':'#ff453a'},sw:['#000c18','#30a8ff','#0a84ff']},
-  'orange':{name:'Колледж',ico:'🟠',vars:{'--bg':'#0d0d0d','--surface':'#161616','--surface2':'#1f1f1f','--surface3':'#2a2a2a','--accent':'#e87722','--accent2':'#c45f0a','--text':'#f0ede8','--muted':'#6b6762','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#0d0d0d','#e87722','#c45f0a']},
-  'amoled':{name:'AMOLED',ico:'⚫',vars:{'--bg':'#000','--surface':'#080808','--surface2':'#111','--surface3':'#1a1a1a','--accent':'#00e5ff','--accent2':'#00acc1','--text':'#fff','--muted':'#505050','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#000','#00e5ff','#00acc1']},
-  'win11':{name:'Win 11',ico:'🔵',vars:{'--bg':'#1a1a1a','--surface':'#222','--surface2':'#2d2d2d','--surface3':'#383838','--accent':'#60cdff','--accent2':'#0067c0','--text':'#fff','--muted':'#888','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#1a1a1a','#60cdff','#0067c0']},
-  'pixel':{name:'Material',ico:'🟣',vars:{'--bg':'#191c1e','--surface':'#22272a','--surface2':'#2c3237','--surface3':'#373d44','--accent':'#7fcfff','--accent2':'#2f71d4','--text':'#e3e5e8','--muted':'#8e9099','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#191c1e','#7fcfff','#2f71d4']},
-  'aero':{name:'Aero',ico:'💎',vars:{'--bg':'#152030','--surface':'#1a2d44','--surface2':'#1f3755','--surface3':'#274466','--accent':'#7fd7ff','--accent2':'#00a8e8','--text':'#e8f4ff','--muted':'#7a9ab8','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#152030','#7fd7ff','#00a8e8']},
-  'forest':{name:'Лес',ico:'🌿',vars:{'--bg':'#0b1a10','--surface':'#111f15','--surface2':'#182a1d','--surface3':'#213627','--accent':'#4caf7d','--accent2':'#2d8653','--text':'#e0f0e8','--muted':'#6a9076','--success':'#4caf7d','--danger':'#c94f4f'},sw:['#0b1a10','#4caf7d','#2d8653']},
-  'rose':{name:'Розовый',ico:'🌸',vars:{'--bg':'#1a0d12','--surface':'#24111a','--surface2':'#2e1622','--surface3':'#3a1e2d','--accent':'#f472b6','--accent2':'#db2777','--text':'#fce7f3','--muted':'#9d6b80','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#1a0d12','#f472b6','#db2777']},
-  'gold':{name:'Золото',ico:'✨',vars:{'--bg':'#100e00','--surface':'#1a1700','--surface2':'#222000','--surface3':'#2e2a00','--accent':'#f5c518','--accent2':'#c9a000','--text':'#fff9e6','--muted':'#7a7050','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#100e00','#f5c518','#c9a000']},
-  'purple':{name:'Фиолет',ico:'🫐',vars:{'--bg':'#0e0b1a','--surface':'#151025','--surface2':'#1c1630','--surface3':'#251e3d','--accent':'#a78bfa','--accent2':'#7c3aed','--text':'#ede9fe','--muted':'#7060a0','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#0e0b1a','#a78bfa','#7c3aed']},
-  'sunset':{name:'Закат',ico:'🌅',vars:{'--bg':'#0f0a00','--surface':'#1a1000','--surface2':'#241800','--surface3':'#302200','--accent':'#ff6b35','--accent2':'#c94a10','--text':'#fff3ee','--muted':'#7a5040','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#0f0a00','#ff6b35','#c94a10']},
-  'bw':{name:'Ч/Б',ico:'⬜',vars:{'--bg':'#000','--surface':'#111','--surface2':'#1c1c1c','--surface3':'#2a2a2a','--accent':'#ffffff','--accent2':'#cccccc','--text':'#ffffff','--muted':'#666666','--success':'#aaa','--danger':'#888'},sw:['#000','#fff','#888']},
-  'light':{name:'Светлая',ico:'☀️',vars:{'--bg':'#f4f4f4','--surface':'#fff','--surface2':'#ebebeb','--surface3':'#d8d8d8','--accent':'#e87722','--accent2':'#c45f0a','--text':'#111','--muted':'#888','--success':'#4a9e5c','--danger':'#c94f4f'},sw:['#f4f4f4','#e87722','#c45f0a']},
+  'orange':{name:'Колледж', ico:'🟠',vars:{'--bg':'#0d0d0d','--surface':'#161616','--surface2':'#1f1f1f','--surface3':'#2a2a2a','--accent':'#e87722','--accent2':'#c45f0a','--text':'#f0ede8','--muted':'#6b6762'},sw:['#0d0d0d','#e87722','#c45f0a']},
+  'amoled':{name:'AMOLED',  ico:'⚫',vars:{'--bg':'#000','--surface':'#080808','--surface2':'#111','--surface3':'#1a1a1a','--accent':'#00e5ff','--accent2':'#00acc1','--text':'#fff','--muted':'#505050'},sw:['#000','#00e5ff','#00acc1']},
+  'win11': {name:'Win 11',  ico:'🔵',vars:{'--bg':'#1a1a1a','--surface':'#222','--surface2':'#2d2d2d','--surface3':'#383838','--accent':'#60cdff','--accent2':'#0067c0','--text':'#fff','--muted':'#888'},sw:['#1a1a1a','#60cdff','#0067c0']},
+  'pixel': {name:'Material',ico:'🟣',vars:{'--bg':'#191c1e','--surface':'#22272a','--surface2':'#2c3237','--surface3':'#373d44','--accent':'#7fcfff','--accent2':'#2f71d4','--text':'#e3e5e8','--muted':'#8e9099'},sw:['#191c1e','#7fcfff','#2f71d4']},
+  'aero':  {name:'Aero',    ico:'💎',vars:{'--bg':'#152030','--surface':'#1a2d44','--surface2':'#1f3755','--surface3':'#274466','--accent':'#7fd7ff','--accent2':'#00a8e8','--text':'#e8f4ff','--muted':'#7a9ab8'},sw:['#152030','#7fd7ff','#00a8e8']},
+  'forest':{name:'Лес',     ico:'🌿',vars:{'--bg':'#0b1a10','--surface':'#111f15','--surface2':'#182a1d','--surface3':'#213627','--accent':'#4caf7d','--accent2':'#2d8653','--text':'#e0f0e8','--muted':'#6a9076'},sw:['#0b1a10','#4caf7d','#2d8653']},
+  'rose':  {name:'Розовый', ico:'🌸',vars:{'--bg':'#1a0d12','--surface':'#24111a','--surface2':'#2e1622','--surface3':'#3a1e2d','--accent':'#f472b6','--accent2':'#db2777','--text':'#fce7f3','--muted':'#9d6b80'},sw:['#1a0d12','#f472b6','#db2777']},
+  'gold':  {name:'Золото',  ico:'✨',vars:{'--bg':'#100e00','--surface':'#1a1700','--surface2':'#222000','--surface3':'#2e2a00','--accent':'#f5c518','--accent2':'#c9a000','--text':'#fff9e6','--muted':'#7a7050'},sw:['#100e00','#f5c518','#c9a000']},
+  'purple':{name:'Фиолет',  ico:'🫐',vars:{'--bg':'#0e0b1a','--surface':'#151025','--surface2':'#1c1630','--surface3':'#251e3d','--accent':'#a78bfa','--accent2':'#7c3aed','--text':'#ede9fe','--muted':'#7060a0'},sw:['#0e0b1a','#a78bfa','#7c3aed']},
+  'sunset':{name:'Закат',   ico:'🌅',vars:{'--bg':'#0f0a00','--surface':'#1a1000','--surface2':'#241800','--surface3':'#302200','--accent':'#ff6b35','--accent2':'#c94a10','--text':'#fff3ee','--muted':'#7a5040'},sw:['#0f0a00','#ff6b35','#c94a10']},
+  'bw':    {name:'Ч/Б',     ico:'⬜',vars:{'--bg':'#000','--surface':'#111','--surface2':'#1c1c1c','--surface3':'#2a2a2a','--accent':'#ffffff','--accent2':'#cccccc','--text':'#ffffff','--muted':'#666666'},sw:['#000','#fff','#888']},
+  'light': {name:'Светлая', ico:'☀️',vars:{'--bg':'#f4f4f4','--surface':'#fff','--surface2':'#ebebeb','--surface3':'#d8d8d8','--accent':'#e87722','--accent2':'#c45f0a','--text':'#111','--muted':'#888'},sw:['#f4f4f4','#e87722','#c45f0a']},
 };
 function applyTheme(key){
-  const t=THEMES[key]||THEMES['glass'];
+  const t=THEMES[key]||THEMES['orange'];
   Object.entries(t.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
   document.documentElement.setAttribute('data-theme',key);
   S.theme=key;saveLocal();renderThemeList();updateThemeRow();
-  const m=document.getElementById('meta-theme');if(m)m.content=t.sw[0];
 }
 function renderThemeList(){
   const g=document.getElementById('theme-list');if(!g)return;g.innerHTML='';
@@ -613,7 +287,8 @@ function renderThemeList(){
   });
 }
 function updateThemeRow(){
-  const t=THEMES[S.theme];const el=document.getElementById('theme-current-name');
+  const t=THEMES[S.theme];
+  const el=document.getElementById('theme-current-name');
   if(el)el.textContent=(t?.ico||'')+' '+(t?.name||S.theme);
 }
 
@@ -621,7 +296,7 @@ function updateThemeRow(){
 const BELL_MON={'I':['09:00','09:45','09:50','10:35'],'II':['10:45','11:30','11:35','12:20'],'III':['12:50','13:35','13:40','14:25'],'IV':['14:35','15:35',null,null],'V':['15:45','16:45',null,null],'VI':['16:55','17:55',null,null]};
 const BELL_TUE={'I':['08:30','09:15','09:20','10:05'],'II':['10:15','11:00','11:05','11:50'],'III':['12:20','13:05','13:10','13:55'],'IV':['14:05','15:05',null,null],'V':['15:15','16:15',null,null],'VI':['16:25','17:25',null,null]};
 
-// OLE2
+// OLE2 ПАРСЕР
 function u32(buf,off){return new DataView(buf instanceof Uint8Array?buf.buffer:buf,buf instanceof Uint8Array?buf.byteOffset:0).getUint32(off,true)}
 function u16(buf,off){return new DataView(buf instanceof Uint8Array?buf.buffer:buf,buf instanceof Uint8Array?buf.byteOffset:0).getUint16(off,true)}
 function ole2Text(ab){
@@ -629,15 +304,24 @@ function ole2Text(ab){
   const arr=new Uint8Array(ab);for(let i=0;i<8;i++)if(arr[i]!==sig[i])return'';
   const ss=Math.pow(2,u16(ab,30));const difat=[];
   for(let i=0;i<Math.min(109,u32(ab,44));i++){const v=u32(ab,76+i*4);if(v>=0xFFFFFFFC)break;difat.push(v);}
-  const fat=[];for(const sn of difat){const off=512+sn*ss;for(let i=0;i<ss/4;i++){const p=off+i*4;if(p+4<=ab.byteLength)fat.push(u32(ab,p));}}
-  function rd(sec,maxSz){const chunks=[];let total=0;const vis=new Set();while(sec!==0xFFFFFFFE&&sec!==0xFFFFFFFF&&!vis.has(sec)){vis.add(sec);const off=512+sec*ss;if(off>=ab.byteLength)break;const len=Math.min(ss,ab.byteLength-off);chunks.push(new Uint8Array(ab,off,len));total+=len;if(maxSz&&total>=maxSz)break;if(sec>=fat.length)break;sec=fat[sec];}const out=new Uint8Array(maxSz?Math.min(total,maxSz):total);let pos=0;for(const c of chunks){const take=Math.min(c.length,out.length-pos);out.set(c.slice(0,take),pos);pos+=take;if(pos>=out.length)break;}return out;}
-  const dd=rd(u32(ab,48));let ws=0,wz=0;for(let i=0;i<Math.floor(dd.length/128);i++){const e=dd.slice(i*128,(i+1)*128);if(e.length<128)break;const nl=e[64]|e[65]<<8;const nm=nl>=2?new TextDecoder('utf-16le').decode(e.slice(0,nl-2)):'';if(nm==='WordDocument'){const dv=new DataView(dd.buffer,dd.byteOffset+i*128);ws=dv.getUint32(116,true);wz=dv.getUint32(120,true);break;}}
+  const fat=[];
+  for(const sn of difat){const off=512+sn*ss;for(let i=0;i<ss/4;i++){const p=off+i*4;if(p+4<=ab.byteLength)fat.push(u32(ab,p));}}
+  function rd(sec,maxSz){
+    const chunks=[];let total=0;const vis=new Set();
+    while(sec!==0xFFFFFFFE&&sec!==0xFFFFFFFF&&!vis.has(sec)){vis.add(sec);const off=512+sec*ss;if(off>=ab.byteLength)break;const len=Math.min(ss,ab.byteLength-off);chunks.push(new Uint8Array(ab,off,len));total+=len;if(maxSz&&total>=maxSz)break;if(sec>=fat.length)break;sec=fat[sec];}
+    const out=new Uint8Array(maxSz?Math.min(total,maxSz):total);let pos=0;
+    for(const c of chunks){const take=Math.min(c.length,out.length-pos);out.set(c.slice(0,take),pos);pos+=take;if(pos>=out.length)break;}return out;
+  }
+  const dd=rd(u32(ab,48));let ws=0,wz=0;
+  for(let i=0;i<Math.floor(dd.length/128);i++){const e=dd.slice(i*128,(i+1)*128);if(e.length<128)break;const nl=e[64]|e[65]<<8;const nm=nl>=2?new TextDecoder('utf-16le').decode(e.slice(0,nl-2)):'';if(nm==='WordDocument'){const dv=new DataView(dd.buffer,dd.byteOffset+i*128);ws=dv.getUint32(116,true);wz=dv.getUint32(120,true);break;}}
   if(!wz)return'';const wsd=rd(ws,wz);if(wsd.length<32)return'';
   const dv=new DataView(wsd.buffer,wsd.byteOffset);const fc=dv.getUint32(24,true),cc=dv.getUint32(28,true);if(fc>=wsd.length)return'';
   return new TextDecoder('utf-16le').decode(wsd.slice(fc,fc+cc*2));
 }
 function getCells(ab){const t=ole2Text(ab);if(!t)return[];return t.split('\x07').map(c=>c.replace(/\r/g,'\n').trim());}
-const GRP=/^[А-ЯЁA-Z0-9]{1,5}[\-]?\d[\-]\d{2}$/u;const ROM=/^(I{1,3}V?|VI{0,3}|IV)$/;const HDR=/Расписание занятий/i;
+const GRP=/^[А-ЯЁA-Z0-9]{1,5}[\-]?\d[\-]\d{2}$/u;
+const ROM=/^(I{1,3}V?|VI{0,3}|IV)$/;
+const HDR=/Расписание занятий/i;
 function norm(s){return s.trim().toUpperCase().replace(/[\s\-\.]/g,'')}
 function detectGroups(ab){const seen={};for(const c of getCells(ab)){const t=c.trim();if(GRP.test(t)){const k=norm(t);if(!seen[k])seen[k]=t;}}return Object.values(seen).sort();}
 function parseDoc(ab,group){
@@ -647,86 +331,72 @@ function parseDoc(ab,group){
   return{sched:[],hdr:''};
 }
 
-// ЯНДЕКС
-// ЯНДЕКС ДИСК — подключение через /proxy/ (Cloudflare Worker на том же домене)
+// ЯНДЕКС ДИСК (Cloudflare Worker /proxy/)
 const PROXY='/proxy/';
-
 async function yadGet(path,params){
   const qs=new URLSearchParams(params).toString();
   const raw=`https://cloud-api.yandex.net${path}?${qs}`;
   const r=await fetch(PROXY+encodeURIComponent(raw),{signal:AbortSignal.timeout(15000)});
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  const el=document.getElementById('proxy-status');
-  if(el)el.textContent='✅ Подключено';
+  const el=document.getElementById('proxy-status');if(el)el.textContent='✅ Подключено';
   return r.json();
 }
-
 async function yadDownload(rawUrl){
   const r=await fetch(PROXY+encodeURIComponent(rawUrl),{signal:AbortSignal.timeout(60000)});
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
   return r.arrayBuffer();
 }
 
-
 // СОСТОЯНИЕ
 const DEFAULT_URL='https://disk.yandex.ru/d/mjhoc7kysmQEuQ';
-const S={url:DEFAULT_URL,files:[],selectedFile:null,lastGroup:'',theme:'glass'};
+const S={url:DEFAULT_URL,files:[],selectedFile:null,lastGroup:'',theme:'orange'};
 const FILE_CACHE={};let allGroups=[];
 const _mem={};
 const stor={get(k){try{return localStorage.getItem(k);}catch(e){return _mem[k]||null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){_mem[k]=v;}}};
-function loadLocal(){
-  try{
-    const d=JSON.parse(stor.get('sched')||'{}');
-    S.lastGroup=d.group||'';S.theme=d.theme||'glass';S.url=d.url||DEFAULT_URL;
-    const inp=document.getElementById('url-input');if(inp)inp.value=S.url;
-    const pi=document.getElementById('proxy-input-screen');if(pi)pi.value=S.customProxy;
-  }catch(e){}
-}
+function loadLocal(){try{const d=JSON.parse(stor.get('sched')||'{}');S.lastGroup=d.group||'';S.theme=d.theme||'orange';S.url=d.url||DEFAULT_URL;const inp=document.getElementById('url-input');if(inp)inp.value=S.url;}catch(e){}}
 function saveLocal(){stor.set('sched',JSON.stringify({group:S.lastGroup,theme:S.theme,url:S.url}));}
 
-// НАВИГАЦИЯ + ПЛАВНЫЕ ПЕРЕХОДЫ
-// ── requestIdleCallback: если браузер занят — ждём свободный момент, потом анимируем ──
-// Анимация ВСЕГДА воспроизводится, просто иногда чуть позже (не пропускается).
-
+// НАВИГАЦИЯ + ИСТОРИЯ БРАУЗЕРА
 let cur='s-home';
 const SCREEN_PARENTS={
-  's-groups':{parent:'s-home',nav:'nav-home'},
-  's-schedule':{parent:'s-home',nav:'nav-home'},
-  's-bells':{parent:'s-home',nav:'nav-bells'},
-  's-settings':{parent:'s-home',nav:'nav-home'},
-  's-proxy':{parent:'s-settings',nav:null},
-  's-themes':{parent:'s-settings',nav:null}
+  's-groups'  :{parent:'s-home',    nav:'nav-home'},
+  's-schedule':{parent:'s-home',    nav:'nav-home'}, // назад → всегда на главную
+  's-bells'   :{parent:'s-home',    nav:'nav-bells'},
+  's-settings':{parent:'s-home',    nav:'nav-home'},
+  's-themes'  :{parent:'s-settings',nav:null},
 };
-
-function _doTransition(prev,next,dir){
+// Плавные переходы через requestIdleCallback:
+// если браузер занят → ждём свободный момент (≤300мс), потом анимируем.
+// Анимация ВСЕГДА воспроизводится, просто иногда чуть позже.
+function _runTransition(prev,next,dir){
   prev.classList.add(dir==='back'?'exit-right':'exit-left');
   prev.classList.remove('active');
   setTimeout(()=>prev.classList.remove('exit-left','exit-right'),320);
-  // Двойной rAF: фиксируем начальный стейт, потом плавно анимируем
   next.style.transition='none';
-  void next.getBoundingClientRect();
+  void next.getBoundingClientRect(); // force reflow — фиксируем начальный стейт
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    next.style.transition='';
-    next.classList.add('active');
+    next.style.transition=''; next.classList.add('active');
   }));
 }
-
 function showScreen(id,dir='forward'){
   if(id===cur)return;
   const prev=document.getElementById(cur),next=document.getElementById(id);
   cur=id;
-  // Ждём свободный кадр — потом анимируем. Timeout 300мс = максимум ждём 300мс.
-  if(typeof requestIdleCallback!=='undefined'){
-    requestIdleCallback(()=>_doTransition(prev,next,dir),{timeout:300});
-  } else {
-    setTimeout(()=>_doTransition(prev,next,dir),0);
-  }
+  const go=()=>_runTransition(prev,next,dir);
+  typeof requestIdleCallback!=='undefined'
+    ? requestIdleCallback(go,{timeout:300})
+    : setTimeout(go,0);
 }
 function pushScreen(id,navId){showScreen(id);if(navId)updateNavActive(navId);history.pushState({screen:id},'');}
 function goHome(){showScreen('s-home','back');updateNavActive('nav-home');updateLastGroupBtn();const fs=document.getElementById('file-section');const err=document.getElementById('home-error-hint');const noUrl=document.getElementById('no-url-hint');if(fs.classList.contains('hidden')&&err.classList.contains('hidden')&&noUrl.classList.contains('hidden'))loadFiles();}
 function navTo(id,navId){pushScreen(id,navId);}
 function histBack(){history.back();}
-function handleBack(){const info=SCREEN_PARENTS[cur];if(!info)return;if(info.parent==='s-home')goHome();else{showScreen(info.parent,'back');if(info.nav)updateNavActive(info.nav);}}
+function handleBack(){
+  const info=SCREEN_PARENTS[cur];
+  if(!info)return;
+  if(info.parent==='s-home'){goHome();}
+  else{showScreen(info.parent,'back');if(info.nav)updateNavActive(info.nav);}
+}
 window.addEventListener('popstate',function(){handleBack();});
 function updateNavActive(aid){['nav-home','nav-bells','nav-settings'].forEach(id=>document.getElementById(id)?.classList.toggle('active',id===aid));}
 
@@ -734,7 +404,7 @@ function updateNavActive(aid){['nav-home','nav-bells','nav-settings'].forEach(id
 function updateLastGroupBtn(){const wrap=document.getElementById('last-group-wrap'),btn=document.getElementById('last-group-btn');if(S.lastGroup){btn.textContent='▶ '+S.lastGroup;wrap.classList.remove('hidden');}else wrap.classList.add('hidden');}
 async function jumpToLastGroup(){if(!S.selectedFile){toast('Сначала загрузи файл расписания');return;}await loadSchedule(S.lastGroup);}
 
-// ЗАГРУЗКА
+// ЗАГРУЗКА ФАЙЛОВ
 function saveUrlAndLoad(){const inp=document.getElementById('url-input');const url=inp?inp.value.trim():'';if(!url){toast('Введи ссылку');return;}S.url=url;saveLocal();goHome();loadFiles();}
 function hideHomeHints(){['no-url-hint','home-error-hint'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));}
 async function loadFiles(){
@@ -747,8 +417,7 @@ async function loadFiles(){
     setTimeout(()=>{setBar('home-bar',0);setStatus('home-status','');},1200);renderFileList();
   }catch(e){
     setBar('home-bar',0);setStatus('home-status','');
-    const el=document.getElementById('home-error-hint');
-    if(el){el.querySelector('.error-msg').textContent=e.message+' — попробуй сменить прокси';el.classList.remove('hidden');}
+    const el=document.getElementById('home-error-hint');if(el){el.querySelector('.error-msg').textContent=e.message;el.classList.remove('hidden');}
     document.getElementById('file-section')?.classList.add('hidden');
   }
 }
@@ -757,13 +426,23 @@ function renderFileList(){
   S.files.forEach(f=>{const item=document.createElement('div');item.className='list-item'+(S.selectedFile?.name===f.name?' selected':'');item.innerHTML=`<span class="item-name">${f.name}</span>`;item.onclick=()=>{S.selectedFile=f;renderFileList();toast('Выбран: '+f.name);};list.appendChild(item);});
   document.getElementById('file-section').classList.remove('hidden');
 }
-async function getFileBuf(){const key=S.selectedFile.path||S.selectedFile.name;if(FILE_CACHE[key])return FILE_CACHE[key];const dl=await yadGet('/v1/disk/public/resources/download',{public_key:S.url,path:S.selectedFile.path});if(!dl?.href)throw new Error('Нет ссылки на файл');const buf=await yadDownload(dl.href);FILE_CACHE[key]=buf;return buf;}
+
+// БУФЕР
+async function getFileBuf(){
+  const key=S.selectedFile.path||S.selectedFile.name;if(FILE_CACHE[key])return FILE_CACHE[key];
+  const dl=await yadGet('/v1/disk/public/resources/download',{public_key:S.url,path:S.selectedFile.path});
+  if(!dl||!dl.href)throw new Error('Яндекс не вернул ссылку на файл');
+  const buf=await yadDownload(dl.href);FILE_CACHE[key]=buf;return buf;
+}
+
+// ГРУППЫ
 async function goToGroups(){
   if(!S.selectedFile){toast('Сначала выбери файл');return;}
-  pushScreen('s-groups');document.getElementById('groups-title').textContent=S.selectedFile.name;
+  pushScreen('s-groups');
+  document.getElementById('groups-title').textContent=S.selectedFile.name;
   document.getElementById('group-search').value='';document.getElementById('group-list').innerHTML='';
   setStatus('groups-status','Скачиваю...');setBar('groups-bar',20);
-  try{const buf=await getFileBuf();allGroups=detectGroups(buf);setBar('groups-bar',100);setStatus('groups-status',allGroups.length+' групп');setTimeout(()=>setBar('groups-bar',0),800);renderGroupList(allGroups);}
+  try{const buf=await getFileBuf();allGroups=detectGroups(buf);setBar('groups-bar',100);setStatus('groups-status',`${allGroups.length} групп`);setTimeout(()=>setBar('groups-bar',0),800);renderGroupList(allGroups);}
   catch(e){setBar('groups-bar',0);setStatus('groups-status','❌ '+e.message);}
 }
 function renderGroupList(groups){
@@ -771,16 +450,21 @@ function renderGroupList(groups){
   groups.forEach(g=>{const item=document.createElement('div');item.className='list-item'+(S.lastGroup===g?' selected':'');item.innerHTML=`<span class="item-name">${g}</span>`;item.onclick=()=>loadSchedule(g);list.appendChild(item);});
 }
 function filterGroups(q){const f=q.trim().toUpperCase();renderGroupList(f?allGroups.filter(g=>g.toUpperCase().includes(f)):allGroups);}
+
+// РАСПИСАНИЕ
 async function loadSchedule(group){
-  if(!S.selectedFile){toast('Выбери файл');return;}pushScreen('s-schedule');
+  if(!S.selectedFile){toast('Выбери файл');return;}
+  pushScreen('s-schedule');
   S.lastGroup=group;saveLocal();updateLastGroupBtn();
-  document.getElementById('sched-group-name').textContent=group;document.getElementById('sched-date').textContent='';
+  document.getElementById('sched-group-name').textContent=group;
+  document.getElementById('sched-date').textContent='';
   document.getElementById('sched-body').innerHTML='<div style="text-align:center;padding:50px;color:var(--muted)">Обрабатываю...</div>';
   try{const buf=await getFileBuf();const{sched,hdr}=parseDoc(buf,group);if(!sched.length)throw new Error(`Группа "${group}" не найдена`);renderSchedule(group,hdr,sched,S.selectedFile.name);}
   catch(e){document.getElementById('sched-body').innerHTML=`<div style="text-align:center;padding:50px;color:var(--danger)">❌ ${e.message}</div>`;}
 }
 function renderSchedule(group,hdr,sched,filename){
-  document.getElementById('sched-group-name').textContent=group;document.getElementById('sched-date').textContent=hdr.replace('Расписание занятий на ','').trim()||'';
+  document.getElementById('sched-group-name').textContent=group;
+  document.getElementById('sched-date').textContent=hdr.replace('Расписание занятий на ','').trim()||'';
   const isMon=filename.toUpperCase().includes('ПОНЕДЕЛЬНИК');const bell=isMon?BELL_MON:BELL_TUE;
   const now=new Date(),nowMin=now.getHours()*60+now.getMinutes();
   const body=document.getElementById('sched-body');body.innerHTML='';
@@ -791,46 +475,37 @@ function renderSchedule(group,hdr,sched,filename){
     const card=document.createElement('div');card.className='pair-card'+(isEmpty?'':' has-subject')+(isNow?' is-now':isNext?' is-next':'');
     let badge='',remain='';
     if(isNow){badge='<span class="now-badge">● сейчас</span>';if(b&&b[1]){const endS=b[3]||b[1];const[eh,em]=endS.split(':').map(Number);const diff=(eh*60+em)-nowMin;remain=`<div class="pair-remain">${diff<=0?'заканч.':diff+' мин'}</div>`;}}
-    else if(isNext)badge='<span class="now-badge next-badge">◎ скоро</span>';
+    else if(isNext){badge='<span class="now-badge next-badge">◎ скоро</span>';}
     let timesHtml='';
     if(b){const[s1,e1,s2,e2]=b;timesHtml=`<div class="pair-times"><div class="pair-time-row"><span class="pair-time-val">${s1} – ${e1}</span><span class="pair-time-tag">${s2?'1 урок':'60 мин'}</span></div>${s2?`<div class="pair-time-row"><span class="pair-time-val">${s2} – ${e2}</span><span class="pair-time-tag">2 урок</span></div>`:''}</div>`;}
     card.innerHTML=`<div class="pair-top"><div class="pair-num">${roman}</div><div class="pair-subject-wrap"><div class="pair-subject${isEmpty?' empty':''}">${isEmpty?'Окно':lines[0]}</div>${badge}</div>${remain}</div>${timesHtml}${lines.length>1?`<div class="pair-details">${lines.slice(1).join('<br>')}</div>`:''}`;
     body.appendChild(card);
   }
 }
+
+// ЗВОНКИ
 function renderBells(){
   const body=document.getElementById('bells-body');
   const day=(title,bell)=>{let h=`<div class="bell-day">${title}</div>`;Object.entries(bell).forEach(([num,[s1,e1,s2,e2]])=>{h+=`<div class="bell-card"><div class="bell-num">${num}</div><div class="bell-slots"><div class="bell-slot"><span class="bell-slot-time">${s1} – ${e1}</span><span class="bell-slot-tag">${s2?'1 урок':'60 мин'}</span></div>${s2?`<div class="bell-slot"><span class="bell-slot-time">${s2} – ${e2}</span><span class="bell-slot-tag">2 урок</span></div>`:''}</div></div>`;});return h;};
   body.innerHTML=day('Понедельник',BELL_MON)+day('Вторник – Пятница',BELL_TUE);
 }
+
+// УТИЛИТЫ
 function setStatus(id,t){const el=document.getElementById(id);if(el)el.textContent=t;}
 function setBar(id,v){const el=document.getElementById(id);if(el)el.style.width=v+'%';}
-let _tt;function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2500);}
+let _tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2500);}
 
 // INIT
-loadLocal();applyTheme(S.theme);updateThemeRow();renderThemeList();renderBells();updateLastGroupBtn();
+loadLocal();
+applyTheme(S.theme);
+updateThemeRow();
+renderThemeList();
+renderBells();
+updateLastGroupBtn();
 document.getElementById('url-input').value=S.url;
-document.getElementById('version-display').textContent=APP_VERSION;
 history.replaceState({screen:'s-home'},'');
 loadFiles();
-
-// ── Service Worker: кешируем приложение для работы без Cloudflare ──
-// После первого открытия (даже через VPN) — приложение работает локально из кеша.
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/sw.js')
-    .then(reg=>{
-      console.log('[SW] зарегистрирован, scope:',reg.scope);
-      // Если есть обновление SW — уведомляем
-      reg.addEventListener('updatefound',()=>{
-        const nw=reg.installing;
-        if(nw)nw.addEventListener('statechange',()=>{
-          if(nw.state==='installed'&&navigator.serviceWorker.controller)
-            toast('Приложение обновлено! Обновите страницу.');
-        });
-      });
-    })
-    .catch(e=>console.warn('[SW] ошибка:',e));
-}
 </script>
 </body>
 </html>
