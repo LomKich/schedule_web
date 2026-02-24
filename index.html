@@ -452,15 +452,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
     <button class="btn btn-accent2" onclick="saveUrlAndLoad()">⬇ Обновить файлы</button>
     <div style="height:6px"></div>
     <div class="status" id="proxy-status" style="text-align:left;font-size:11px"></div>
-    <div class="sep"></div>
-    <div class="section-label">Прокси (обход блокировок)</div>
-    <div id="proxy-current-row" class="list-item" onclick="pushScreen('s-proxy')" style="margin-bottom:8px">
-      <div>
-        <div class="item-name" id="proxy-current-name">AllOrigins</div>
-        <div class="item-sub" id="proxy-current-sub">api.allorigins.win • Нажми для выбора</div>
-      </div>
-      <span class="item-arrow">›</span>
-    </div>
+    
     <div class="sep"></div>
     <div class="section-label">Тема оформления</div>
     <div id="theme-current-row" class="list-item" onclick="pushScreen('s-themes')">
@@ -491,31 +483,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Geolog
   </div>
 </div>
 
-<!-- ВЫБОР ПРОКСИ -->
-<div class="screen" id="s-proxy">
-  <div class="hdr">
-    <button class="hdr-back" onclick="histBack()">‹</button>
-    <div>
-      <div class="hdr-title">Прокси</div>
-      <div class="hdr-sub">Способ подключения к Яндексу</div>
-    </div>
-  </div>
-  <div class="body">
-    <div style="background:color-mix(in srgb,var(--accent) 10%,transparent);border:1.5px solid color-mix(in srgb,var(--accent) 40%,transparent);border-radius:var(--rb);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text);line-height:1.6">
-      🇷🇺 <b>Для России:</b> Cloudflare заблокирован — используй публичный прокси ниже.
-    </div>
-    <div class="proxy-list" id="proxy-list-screen"></div>
-    <div id="custom-proxy-screen-wrap" class="hidden" style="margin-top:12px">
-      <input class="inp" id="proxy-input-screen" placeholder="https://your-proxy.workers.dev/proxy/"
-             autocomplete="off" autocorrect="off" autocapitalize="off" oninput="S.customProxy=this.value">
-      <div style="height:8px"></div>
-      <button class="btn btn-accent2" onclick="saveCustomProxyFromScreen()">💾 Сохранить адрес</button>
-    </div>
-    <div style="height:10px"></div>
-    <button class="btn btn-surface" onclick="testCurrentProxy()" id="proxy-test-btn">🔌 Проверить подключение</button>
-    <div class="status" id="proxy-test-status" style="text-align:left;margin-top:8px;font-size:12px"></div>
-  </div>
-</div>
 
 <!-- ВЫБОР ТЕМЫ -->
 <div class="screen" id="s-themes">
@@ -594,61 +561,25 @@ document.addEventListener('click',function(e){
 });
 
 // ПРОКСИ
-const PROXY_PROVIDERS={
-  'allorigins':{name:'AllOrigins',addr:'api.allorigins.win',ico:'🔓',tag:'tag-free',tagText:'бесплатно',desc:'Стабильный публичный прокси. Бинарные файлы через base64.',url:'https://api.allorigins.win/raw?url=',format:'query_url'},
-  'corsproxy':{name:'corsproxy.io',addr:'corsproxy.io',ico:'🌐',tag:'tag-free',tagText:'бесплатно',desc:'Быстрый. Может требовать ожидания при лимите.',url:'https://corsproxy.io/?url=',format:'query_url'},
-  'codetabs':{name:'CodeTabs',addr:'api.codetabs.com',ico:'📦',tag:'tag-free',tagText:'бесплатно',desc:'Без авторизации, поддерживает бинарные файлы.',url:'https://api.codetabs.com/v1/proxy?quest=',format:'append_raw'},
-  'thingproxy':{name:'ThingProxy',addr:'thingproxy.freeboard.io',ico:'🔁',tag:'tag-free',tagText:'бесплатно',desc:'Простой CORS-прокси без ограничений по типу.',url:'https://thingproxy.freeboard.io/fetch/',format:'append_raw'},
-  'cf_worker':{name:'Cloudflare Worker',addr:'your-proxy.workers.dev',ico:'☁️',tag:'tag-own',tagText:'свой',desc:'Самый надёжный. Деплой за 5 мин. ⚠️ Заблокирован в РФ без VPN.',url:'',format:'append_encoded'},
-  'custom':{name:'Свой URL',addr:'любой адрес',ico:'⚙️',tag:'tag-own',tagText:'свой',desc:'Введи адрес своего прокси вручную.',url:'',format:'append_encoded'},
-};
-function buildProxyUrl(b,fmt,t){return fmt==='append_raw'?b+t:b+encodeURIComponent(t);}
-function getActiveProxy(){
-  const k=S.proxyProvider||'allorigins';const p=PROXY_PROVIDERS[k]||PROXY_PROVIDERS['allorigins'];
-  let url=p.url;
-  if(k==='cf_worker'||k==='custom')url=S.customProxy?(S.customProxy.endsWith('/')?S.customProxy:S.customProxy+'/'):'/proxy/';
-  return{url,format:p.format||'query_url',provider:k};
+// Прокси — оригинальный метод: /proxy/ на том же Cloudflare Worker
+const PROXY='/proxy/';
+
+async function yadGet(path,params){
+  const qs=new URLSearchParams(params).toString();
+  const raw=`https://cloud-api.yandex.net${path}?${qs}`;
+  const r=await fetch(PROXY+encodeURIComponent(raw),{signal:AbortSignal.timeout(15000)});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  const el=document.getElementById('proxy-status');
+  if(el)el.textContent='✅ Подключено';
+  return r.json();
 }
-function renderProxyList(){
-  const list=document.getElementById('proxy-list-screen');if(!list)return;list.innerHTML='';
-  Object.entries(PROXY_PROVIDERS).forEach(([key,p])=>{
-    const sel=S.proxyProvider===key;const card=document.createElement('div');
-    card.className='proxy-card'+(sel?' selected':'');
-    card.innerHTML='<div class="proxy-ico">'+p.ico+'</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px"><div class="proxy-name">'+p.name+'</div><span class="proxy-tag '+p.tag+'">'+p.tagText+'</span></div><div class="proxy-addr">'+p.addr+'</div><div class="proxy-desc">'+p.desc+'</div></div><div class="proxy-check">✓</div>';
-    card.onclick=()=>selectProxy(key);list.appendChild(card);
-  });
-  const ni=(S.proxyProvider==='cf_worker'||S.proxyProvider==='custom');
-  const wrap=document.getElementById('custom-proxy-screen-wrap');if(wrap)wrap.classList.toggle('hidden',!ni);
-  const inp=document.getElementById('proxy-input-screen');if(inp)inp.value=S.customProxy||'';
+
+async function yadDownload(rawUrl){
+  const r=await fetch(PROXY+encodeURIComponent(rawUrl),{signal:AbortSignal.timeout(60000)});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  return r.arrayBuffer();
 }
-function updateProxyCurrentRow(){
-  const p=PROXY_PROVIDERS[S.proxyProvider]||PROXY_PROVIDERS['allorigins'];
-  const n=document.getElementById('proxy-current-name');const s=document.getElementById('proxy-current-sub');
-  if(n)n.textContent=p.ico+' '+p.name;if(s)s.textContent=p.addr+' • Нажми для смены';
-  const el=document.getElementById('proxy-status');if(el)el.textContent='';
-}
-function selectProxy(key){
-  S.proxyProvider=key;saveLocal();renderProxyList();updateProxyCurrentRow();
-  toast('Прокси: '+(PROXY_PROVIDERS[key]?.name||key));
-  const err=document.getElementById('home-error-hint');
-  if(err&&!err.classList.contains('hidden'))loadFiles();
-}
-function saveCustomProxyFromScreen(){
-  const v=(document.getElementById('proxy-input-screen')?.value||'').trim();
-  S.customProxy=v;saveLocal();toast(v?'Прокси сохранён':'Адрес очищен');updateProxyCurrentRow();
-  if(v){const err=document.getElementById('home-error-hint');if(err&&!err.classList.contains('hidden'))loadFiles();}
-}
-async function testCurrentProxy(){
-  const btn=document.getElementById('proxy-test-btn');const status=document.getElementById('proxy-test-status');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Проверяю...';}if(status)status.textContent='';
-  try{
-    const{url:pBase,format}=getActiveProxy();if(!pBase)throw new Error('Прокси не настроен');
-    const testUrl='https://cloud-api.yandex.net/v1/disk/public/resources?public_key=test&limit=1';
-    const r=await fetch(buildProxyUrl(pBase,format,testUrl),{signal:AbortSignal.timeout(10000)});
-    if(status)status.textContent=r.status<500?'✅ Прокси работает! HTTP '+r.status:'❌ Ошибка HTTP '+r.status;
-  }catch(e){if(status)status.textContent='❌ '+e.message;}
-  if(btn){btn.disabled=false;btn.textContent='🔌 Проверить подключение';}
-}
+
 
 // ТЕМЫ
 const THEMES={
@@ -717,33 +648,29 @@ function parseDoc(ab,group){
 }
 
 // ЯНДЕКС
-async function yadDownloadAllOrigins(rawUrl){
-  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(rawUrl),{signal:AbortSignal.timeout(45000)});
-  if(!r.ok)throw new Error('AllOrigins HTTP '+r.status);
-  const data=await r.json();if(!data.contents)throw new Error('Пустой ответ');
-  const c=data.contents;if(typeof c==='string'&&c.startsWith('data:'))return base64ToArrayBuffer(c.split(',')[1]);
-  return new TextEncoder().encode(c).buffer;
-}
-function base64ToArrayBuffer(b64){const bin=atob(b64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;}
+// ЯНДЕКС ДИСК — подключение через /proxy/ (Cloudflare Worker на том же домене)
+const PROXY='/proxy/';
+
 async function yadGet(path,params){
-  const raw=`https://cloud-api.yandex.net${path}?${new URLSearchParams(params)}`;
-  const{url:pBase,format,provider}=getActiveProxy();if(!pBase)throw new Error('Прокси не настроен');
-  const r=await fetch(buildProxyUrl(pBase,format,raw),{signal:AbortSignal.timeout(15000)});
-  if(!r.ok)throw new Error('Прокси HTTP '+r.status);
-  const el=document.getElementById('proxy-status');if(el)el.textContent='✅ '+(PROXY_PROVIDERS[provider]?.name||provider);
+  const qs=new URLSearchParams(params).toString();
+  const raw=`https://cloud-api.yandex.net${path}?${qs}`;
+  const r=await fetch(PROXY+encodeURIComponent(raw),{signal:AbortSignal.timeout(15000)});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  const el=document.getElementById('proxy-status');
+  if(el)el.textContent='✅ Подключено';
   return r.json();
 }
+
 async function yadDownload(rawUrl){
-  const{url:pBase,format,provider}=getActiveProxy();if(!pBase)throw new Error('Прокси не настроен');
-  if(provider==='allorigins')return await yadDownloadAllOrigins(rawUrl);
-  const proxyUrl=buildProxyUrl(pBase,format,rawUrl);
-  try{const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(60000)});if(!r.ok)throw new Error('HTTP '+r.status);const ct=r.headers.get('content-type')||'';if(ct.includes('text/html'))throw new Error('HTML вместо файла');return r.arrayBuffer();}
-  catch(e){try{return await yadDownloadAllOrigins(rawUrl);}catch(e2){throw new Error('Не удалось скачать: '+e.message);}}
+  const r=await fetch(PROXY+encodeURIComponent(rawUrl),{signal:AbortSignal.timeout(60000)});
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  return r.arrayBuffer();
 }
+
 
 // СОСТОЯНИЕ
 const DEFAULT_URL='https://disk.yandex.ru/d/mjhoc7kysmQEuQ';
-const S={url:DEFAULT_URL,files:[],selectedFile:null,lastGroup:'',theme:'glass',customProxy:'',proxyProvider:'allorigins'};
+const S={url:DEFAULT_URL,files:[],selectedFile:null,lastGroup:'',theme:'glass'};
 const FILE_CACHE={};let allGroups=[];
 const _mem={};
 const stor={get(k){try{return localStorage.getItem(k);}catch(e){return _mem[k]||null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){_mem[k]=v;}}};
@@ -751,16 +678,17 @@ function loadLocal(){
   try{
     const d=JSON.parse(stor.get('sched')||'{}');
     S.lastGroup=d.group||'';S.theme=d.theme||'glass';S.url=d.url||DEFAULT_URL;
-    S.customProxy=d.customProxy||'';S.proxyProvider=d.proxyProvider||'allorigins';
     const inp=document.getElementById('url-input');if(inp)inp.value=S.url;
     const pi=document.getElementById('proxy-input-screen');if(pi)pi.value=S.customProxy;
   }catch(e){}
 }
-function saveLocal(){stor.set('sched',JSON.stringify({group:S.lastGroup,theme:S.theme,url:S.url,customProxy:S.customProxy,proxyProvider:S.proxyProvider}));}
+function saveLocal(){stor.set('sched',JSON.stringify({group:S.lastGroup,theme:S.theme,url:S.url}));}
 
-// НАВИГАЦИЯ + ПЛАВНЫЕ АНИМАЦИИ
+// НАВИГАЦИЯ + ПЛАВНЫЕ ПЕРЕХОДЫ
+// ── requestIdleCallback: если браузер занят — ждём свободный момент, потом анимируем ──
+// Анимация ВСЕГДА воспроизводится, просто иногда чуть позже (не пропускается).
+
 let cur='s-home';
-// s-schedule → parent: s-home → нажатие "назад" из расписания ВСЕГДА на главную
 const SCREEN_PARENTS={
   's-groups':{parent:'s-home',nav:'nav-home'},
   's-schedule':{parent:'s-home',nav:'nav-home'},
@@ -770,37 +698,28 @@ const SCREEN_PARENTS={
   's-themes':{parent:'s-settings',nav:null}
 };
 
-// Детектор лагов: отслеживаем время между кадрами
-let prevFrameTs=performance.now();
-requestAnimationFrame(function tick(ts){prevFrameTs=ts;requestAnimationFrame(tick);});
+function _doTransition(prev,next,dir){
+  prev.classList.add(dir==='back'?'exit-right':'exit-left');
+  prev.classList.remove('active');
+  setTimeout(()=>prev.classList.remove('exit-left','exit-right'),320);
+  // Двойной rAF: фиксируем начальный стейт, потом плавно анимируем
+  next.style.transition='none';
+  void next.getBoundingClientRect();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    next.style.transition='';
+    next.classList.add('active');
+  }));
+}
 
-// showScreen: двойной rAF — браузер сначала рисует начальное состояние экрана,
-// только потом запускает CSS-переход. Если лаг > порога — анимация пропускается.
-const LAG_THRESHOLD=180; // мс
 function showScreen(id,dir='forward'){
   if(id===cur)return;
   const prev=document.getElementById(cur),next=document.getElementById(id);
-  const laggy=(performance.now()-prevFrameTs)>LAG_THRESHOLD;
-
-  // Запускаем выход предыдущего экрана
-  prev.classList.add(dir==='back'?'exit-right':'exit-left');
-  prev.classList.remove('active');
-  setTimeout(()=>prev.classList.remove('exit-left','exit-right'),300);
   cur=id;
-
-  if(laggy){
-    // Телефон тормозит — мгновенный переход, без анимации
-    next.style.transition='none';
-    next.classList.add('active');
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{next.style.transition='';}));
+  // Ждём свободный кадр — потом анимируем. Timeout 300мс = максимум ждём 300мс.
+  if(typeof requestIdleCallback!=='undefined'){
+    requestIdleCallback(()=>_doTransition(prev,next,dir),{timeout:300});
   } else {
-    // Всё ок — фиксируем начальный стейт через reflow, затем анимируем
-    next.style.transition='none';
-    void next.getBoundingClientRect(); // принудительный reflow
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      next.style.transition='';
-      next.classList.add('active');
-    }));
+    setTimeout(()=>_doTransition(prev,next,dir),0);
   }
 }
 function pushScreen(id,navId){showScreen(id);if(navId)updateNavActive(navId);history.pushState({screen:id},'');}
@@ -889,7 +808,7 @@ function setBar(id,v){const el=document.getElementById(id);if(el)el.style.width=
 let _tt;function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2500);}
 
 // INIT
-loadLocal();applyTheme(S.theme);updateThemeRow();renderThemeList();renderProxyList();updateProxyCurrentRow();renderBells();updateLastGroupBtn();
+loadLocal();applyTheme(S.theme);updateThemeRow();renderThemeList();renderBells();updateLastGroupBtn();
 document.getElementById('url-input').value=S.url;
 document.getElementById('version-display').textContent=APP_VERSION;
 history.replaceState({screen:'s-home'},'');
